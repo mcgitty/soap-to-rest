@@ -66,10 +66,10 @@ public class OASGenerator {
                         inputModelSchema.addProperties("parameter", inputProp);
                     } else {
                         Schema<?> inputRefProp = new Schema<>();
-                        inputRefProp.setName(inputQName.getQName().getLocalPart().replaceAll("\\s+", ""));
-                        inputRefProp.set$ref(SOAPToRESTConstants.OAS_DEFINITIONS_ROOT_ELEMENT_PATH + inputQName.
-                                getQName().getLocalPart());
-                        inputModelSchema.addProperties(inputQName.getQName().getLocalPart(), inputRefProp);
+                        String qnameLocalPart = inputQName.getQName().getLocalPart();
+                        inputRefProp.setName(qnameLocalPart.replaceAll("\\s+", ""));
+                        inputRefProp.set$ref(SOAPToRESTConstants.OAS_DEFINITIONS_ROOT_ELEMENT_PATH + qnameLocalPart);
+                        inputModelSchema.addProperties(qnameLocalPart, inputRefProp);
                     }
                 }
             } else {
@@ -96,10 +96,11 @@ public class OASGenerator {
                         outputModelSchema.addProperties("parameter", outputProp);
                     } else {
                         Schema<?> outputRefProp = new Schema<>();
-                        outputRefProp.setName(SOAPToRESTConstants.OAS_DEFINITIONS_ROOT_ELEMENT_PATH + outputParamQName.getQName().getLocalPart().replaceAll("\\s+", ""));
+                        String qnameLocalPart = outputParamQName.getQName().getLocalPart();
+                        outputRefProp.setName(SOAPToRESTConstants.OAS_DEFINITIONS_ROOT_ELEMENT_PATH + qnameLocalPart.replaceAll("\\s+", ""));
                         outputRefProp.set$ref(
-                                SOAPToRESTConstants.OAS_DEFINITIONS_ROOT_ELEMENT_PATH + outputParamQName.getQName().getLocalPart());
-                        outputModelSchema.addProperties(outputParamQName.getQName().getLocalPart(), outputRefProp);
+                                SOAPToRESTConstants.OAS_DEFINITIONS_ROOT_ELEMENT_PATH + qnameLocalPart);
+                        outputModelSchema.addProperties(qnameLocalPart, outputRefProp);
                     }
                 }
 
@@ -193,16 +194,12 @@ public class OASGenerator {
                 components.addSchemas(schema.getName(), schema);
             }
 
-            if (xsModel.getElements().size() > 0) {
-                //Process the elements defined in the root XSD and add 'rootElement_' prefix to identify uniquely
-                for (XSElement xsElement : xsModel.getElements()) {
-                    Schema<?> schema = getSchemaForXSElement(xsElement, xsModel.isElementFormDefaultQualified());
-                    schema.setName("rootElement_" + xsElement.getName().getLocalPart().replaceAll("\\s+", ""));
-                    schema.setType("object");
-                    components.addSchemas(schema.getName(), schema);
-
-                }
-
+            //Process the elements defined in the root XSD and add 'rootElement_' prefix to identify uniquely
+            for (XSElement xsElement : xsModel.getElements()) {
+                Schema<?> schema = getSchemaForXSElement(xsElement, xsModel.isElementFormDefaultQualified());
+                schema.setName(SOAPToRESTConstants.ROOT_ELEMENT_PREFIX + xsElement.getName().getLocalPart().replaceAll("\\s+", ""));
+                schema.setType("object");
+                components.addSchemas(schema.getName(), schema);
             }
         }
         return components;
